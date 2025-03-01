@@ -24,7 +24,7 @@ function normalizePosition(e: Event) {
   const originSpaceCount = element.value.split(" ").length - 1;
   const spaceCount = addSpace(element.value).split(" ").length - 1;
 
-  if (originSpaceCount - 1 === spaceCount) {
+  if (originSpaceCount === spaceCount - 1 && !(e as InputEvent).data) {
     const startPosition = element.selectionStart;
     if (startPosition === null) return;
     const newPosition = startPosition - 1;
@@ -37,16 +37,11 @@ function normalizePosition(e: Event) {
     return;
   }
 
-  const targetPosition =
-    startPosition !== null
-      ? addSpace(element.value.slice(0, startPosition).replace(/\D/g, ""))
-          .length
-      : false;
-
+  if (startPosition === null) return;
+  const targetPosition = addSpace(element.value.slice(0, startPosition)).length;
+  const offset = element.value.charAt(startPosition - 1) === " " ? 1 : 0;
   element.value = addSpace(element.value);
-
-  if (typeof targetPosition === "number")
-    element.selectionStart = element.selectionEnd = targetPosition;
+  element.selectionStart = element.selectionEnd = targetPosition + offset;
 }
 
 function checkType(e: Event) {
