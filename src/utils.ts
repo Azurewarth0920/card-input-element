@@ -1,18 +1,26 @@
 const cardPattern = {
-  visa: ["4"],
-  mastercard: ["5"],
-  amex: ["34", "37"],
-  discover: ["6"],
-  diners: ["30", "36", "38"],
-  jcb: ["35"],
-};
+  "4": "visa",
+  "5": "mastercard",
+  "34": "amex",
+  "37": "amex",
+  "6": "discover",
+  "30": "diners",
+  "36": "diners",
+  "38": "diners",
+  "35": "jcb",
+} as const;
 
-type CardType = keyof typeof cardPattern;
+type CardPattern = keyof typeof cardPattern;
+type CardType = (typeof cardPattern)[CardPattern];
 
 export function matchType(cardNumber: string): CardType | undefined {
-  return Object.entries(cardPattern).find(([_, patterns]) =>
-    patterns.some((pattern) => cardNumber.startsWith(pattern))
-  )?.[0] as CardType | undefined;
+  const firstDigit = cardNumber.slice(0, 1);
+  const firstTwoDigits = cardNumber.slice(0, 2);
+
+  return (
+    cardPattern[firstDigit as CardPattern] ||
+    cardPattern[firstTwoDigits as CardPattern]
+  );
 }
 
 export function addSpace(cardNumber: string) {
