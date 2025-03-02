@@ -15,16 +15,25 @@ function preventSelectingSpace(e: Event) {
   }
 }
 
+let currentValue = "";
+
+function recordCurrentValue(e: Event) {
+  const element = e.target as HTMLInputElement;
+  currentValue = element.value;
+}
+
 function normalizePosition(e: Event) {
   const element = e.target as HTMLInputElement;
   const startPosition = element.selectionStart;
 
   // Trying to delete the space.
   // Instead of deleting the space, delete the number before the space.
-  const originSpaceCount = element.value.split(" ").length - 1;
+  const originSpaceCount = currentValue.split(" ").length - 1;
   const spaceCount = addSpace(element.value).split(" ").length - 1;
+  const isValueEqual =
+    currentValue.replace(/\D/g, "") === element.value.replace(/\D/g, "");
 
-  if (originSpaceCount === spaceCount - 1 && !(e as InputEvent).data) {
+  if (originSpaceCount === spaceCount - 1 && isValueEqual) {
     const startPosition = element.selectionStart;
     if (startPosition === null) return;
     const newPosition = startPosition - 1;
@@ -51,6 +60,7 @@ function checkType(e: Event) {
 
 export function setupInput(element: HTMLButtonElement) {
   element.addEventListener("select", preventSelectingSpace);
+  element.addEventListener("beforeinput", recordCurrentValue);
   element.addEventListener("input", normalizePosition);
   element.addEventListener("input", checkType);
 }
