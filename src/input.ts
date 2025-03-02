@@ -1,39 +1,31 @@
 import { addSpace, matchType } from "./utils";
 
 function preventSelectingSpace(e: Event) {
-  const target = e.target as HTMLInputElement;
-
-  const startPosition = target.selectionStart;
-  const endPosition = target.selectionEnd;
-
-  if (startPosition === null || endPosition == null) return;
-
-  const selectedText = target.value.slice(startPosition, endPosition);
-
-  if (selectedText === " ") {
-    target.selectionEnd = target.selectionStart;
-  }
+  const element = e.target as HTMLInputElement;
+  const { selectionStart, selectionEnd } = element;
+  if (selectionStart === null || selectionEnd == null) return;
+  const selected = element.value.slice(selectionStart, selectionEnd);
+  if (selected === " ") element.selectionEnd = element.selectionStart;
 }
 
-let currentValue = "";
+let originalValue = "";
 
-function recordCurrentValue(e: Event) {
+function recordOriginalValue(e: Event) {
   const element = e.target as HTMLInputElement;
-  currentValue = element.value;
+  originalValue = element.value;
 }
 
 function normalizePosition(e: Event) {
   const element = e.target as HTMLInputElement;
   const startPosition = element.selectionStart;
 
-  // Trying to delete the space.
-  // Instead of deleting the space, delete the number before the space.
-  const originSpaceCount = currentValue.split(" ").length - 1;
+  // Handling of backspace before the space, delete the digit before the space.
+  const originalSpaceCount = originalValue.split(" ").length - 1;
   const spaceCount = addSpace(element.value).split(" ").length - 1;
   const isValueEqual =
-    currentValue.replace(/\D/g, "") === element.value.replace(/\D/g, "");
+    originalValue.replace(/\D/g, "") === element.value.replace(/\D/g, "");
 
-  if (originSpaceCount === spaceCount - 1 && isValueEqual) {
+  if (originalSpaceCount === spaceCount - 1 && isValueEqual) {
     const startPosition = element.selectionStart;
     if (startPosition === null) return;
     const newPosition = startPosition - 1;
@@ -60,7 +52,7 @@ function checkType(e: Event) {
 
 export function setupInput(element: HTMLButtonElement) {
   element.addEventListener("select", preventSelectingSpace);
-  element.addEventListener("beforeinput", recordCurrentValue);
+  element.addEventListener("beforeinput", recordOriginalValue);
   element.addEventListener("input", normalizePosition);
   element.addEventListener("input", checkType);
 }
